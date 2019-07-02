@@ -1,9 +1,22 @@
-# excel to sql database
-
-import pandas as pd
 import sqlite3
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+import xlrd
+import re
 
-df = pd.read_excel("sas-schedule-1-april-2019-full.xlsx", skiprows=0)
+def scrape(url):
+    r = requests.get(url)
+    raw_html = r.content
+    soup = BeautifulSoup(raw_html, 'html.parser')
+    soup3 = soup.findAll(href=re.compile("-full.xlsx"))
+    for link in soup3:
+      msg = link.get('href')
+      SS = "https://www.health.gov.au/internet/main/publishing.nsf/Content/", msg
+      msg1 = ("".join(SS))
+    return(msg1)
+stoma_f = scrape("https://www.health.gov.au/internet/main/publishing.nsf/Content/health-stoma-schedule-index.htm")
+df = pd.read_excel(stoma_f)  #### testing function in pandas
 
 db = sqlite3.connect(
     database='db_products.sqlite',
