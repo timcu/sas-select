@@ -29,7 +29,7 @@ for a in lst_a:
 if xl_url_str is None:
     raise IOError("Could not find url for xls for any year between 2012 and " + str(datetime.date.today().year))
 
-df = pd.read_excel("xl_url_str", skiprows=0)
+df = pd.read_excel(xl_url_str, skiprows=0)
 
 db = sqlite3.connect(
     database='db_products.sqlite',
