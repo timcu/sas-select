@@ -86,7 +86,7 @@ def create_app(test_config=None):
     @app.route('/init-db')
     def init_db():
         datasheet.init_db()
-        redirect(url_for('view_products'))
+        return redirect(url_for('view_products'))
 
     return app
 
