@@ -47,14 +47,14 @@ def init_db():
         CompanyCode varchar,
         BrandName varchar,
         ProductDescription varchar,
-        MaximumQty varchar,
         PackSize numeric,
+        MaximumQty varchar,
         PackPrice numeric,
         PackPremium numeric
     )""")
     sas_db.commit()
 
-    sql = """insert into tbl_products (ID,GroupID, SASCode, CompanyCode, BrandName, ProductDescription, MaximumQty, PackSize, PackPrice, PackPremium) 
+    sql = """insert into tbl_products (ID,GroupID, SASCode, CompanyCode, BrandName, ProductDescription, PackSize, MaximumQty, PackPrice, PackPremium) 
     values (?,?,?,?,?,?,?,?,?,?)"""
 
     for index, row in df.iterrows():
