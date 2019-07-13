@@ -30,7 +30,7 @@
                     <td>{{ product.MaximumQty}}</td>
                     <td>{{ product.PackPrice}}</td>
                     <td>{{ product.PackPremium}}</td>
-                    <td><a href="{{ url_for('view_product',id_product=product.id) }}">view</a></td>
+                    <td><a href="{{ url_for('view_product',id_product=product.ID) }}">view</a></td>
                 </tr>
             {% endfor %}
         </table>
