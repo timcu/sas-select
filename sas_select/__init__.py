@@ -62,7 +62,8 @@ def create_app(test_config=None):
 
         else:
             products = None
-        return render_template('listproducts.html', products=products, page_title="Products in database", frm=request.form, version=version.VERSION)
+
+        return render_template('listproducts.html', products=currency_format(products), page_title="Products in database", frm=request.form, version=version.VERSION)
 
     def pack_entitlement(packsize, entitlement):
         if "m" in entitlement:
@@ -92,7 +93,7 @@ def create_app(test_config=None):
             abort(404)
         qty = pack_entitlement(product["PackSize"], product["MaximumQty"])
         print(qty)
-        return render_template('viewproduct.html', product=product, page_title="View product", pack_entitlement=qty, version=version.VERSION)
+        return render_template('viewproduct.html', product=currency_format(product), page_title="View product", pack_entitlement=qty, version=version.VERSION)
     db.init_app(app)
 
     @app.route('/init-db')
@@ -100,5 +101,26 @@ def create_app(test_config=None):
         datasheet.init_db()
         return redirect(url_for('view_products'))
 
+    def currency_format(products):
+        def format_one_product(product):
+            product_dict = dict(zip(product.keys(), product))
+            keys_to_format = ['PackPrice', 'PackPremium']
+            for key in keys_to_format:
+                if product_dict[key] is not None:
+                    if product_dict[key] >= 0:
+                        product_dict[key] = "${:,.2f}".format(product_dict[key])
+                    else:
+                        product_dict[key] = "-${:,.2f}".format(abs(product_dict[key]))
+            return product_dict
+
+        if isinstance(products, (list,)):
+            product_dicts = []
+            for product in products:
+                product_dicts.append(format_one_product(product))
+            return product_dicts
+        elif products is None:
+            return None
+        else:
+            return format_one_product(products)
     return app
 
