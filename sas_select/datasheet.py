@@ -1,12 +1,20 @@
 # excel to sql database
 
-import sqlite3
-
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import pandas as pd
 import datetime
 from . import db
+
+COLUMN_NAMES = ('Group ID',
+                'SAS Code',
+                'Company Code',
+                'Brand Name',
+                'Product Description',
+                'Pack Size',
+                'Maximum Qty\nMonthly (m)\nAnnual (a)',
+                'Pack Price',
+                'Pack Premium')
 
 
 def init_db():
@@ -31,6 +39,14 @@ def init_db():
 
     if xl_url_str is None:
         raise IOError("Could not find url for xls for any year between 2012 and " + str(datetime.date.today().year))
+
+    headers = pd.read_excel(xl_url_str, nrows=0).columns
+    if len(COLUMN_NAMES) != len(headers):
+        raise ValueError("Wrong number of columns", len(COLUMN_NAMES), len(headers))
+
+    for expected, read in zip(COLUMN_NAMES, headers):
+        if expected != read:
+            raise ValueError("Discrepancy in column names", expected, read)
 
     df = pd.read_excel(xl_url_str, skiprows=0)
 
