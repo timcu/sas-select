@@ -18,7 +18,7 @@ div_read = soup.find(id='read')
 
 lst_a = div_read.find_all("a")
 if len(lst_a) == 0:
-    raise IOError("Could not find any hyperlinks on SAS Utilisition web page " + base_url_str + page_url_str)
+    raise IOError("Could not find any hyperlinks on Stoma Appliance Scheme Schedule web page ")
 xl_url_str = None
 for a in lst_a:
     href = a.get('href')
@@ -27,9 +27,9 @@ for a in lst_a:
         break
 
 if xl_url_str is None:
-    raise IOError("Could not find url for xls for any year between 2012 and " + str(datetime.date.today().year))
+    raise IOError("Could not find url for any xls files on Stoma Appliance Scheme Schedule web page")
 
-df = pd.read_excel("xl_url_str", skiprows=0)
+df = pd.read_excel(xl_url_str, skiprows=0)
 
 db = sqlite3.connect(
     database='db_products.sqlite',
