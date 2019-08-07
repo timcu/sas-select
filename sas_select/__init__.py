@@ -69,7 +69,7 @@ def create_app(test_config=None):
 
         else:
             products = None
-        return render_template('listproducts.html', products=products, page_title="Products in database", frm=request.form)
+        return render_template('listproducts.html', products=products, page_title="Products in database", frm=request.form, excel=datasheet.find_last_file_name())
 
     def pack_entitlement(product):
         pack_size = product["PackSize"]
@@ -113,18 +113,18 @@ def create_app(test_config=None):
             abort(404)
         qty = pack_entitlement(product)
         # print(qty)
-        return render_template('viewproduct.html', product=product, page_title="View product", pack_entitlement=qty)
+        return render_template('viewproduct.html', product=product, page_title="View product", pack_entitlement=qty, excel=datasheet.find_last_file_name())
     db.init_app(app)
 
     @app.route('/init-db')
     def init_db():
         try:
-            datasheet.init_db()
+            message = datasheet.init_db()
+            print(message)
+            flash(message, 'success')
         except ValueError as err:
             print(err.args[0], err.args[1])
             flash(err.args[0], 'error')
-        else:
-            flash('Database updated', 'success')
         return redirect(url_for('view_products'))
 
     @app.template_filter()

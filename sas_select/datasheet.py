@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import pandas as pd
 from . import db
+from datetime import datetime
+import re
 
 GROUP_ID = 'Group ID'
 SAS_CODE = 'SAS Code'
@@ -77,5 +79,77 @@ def populate_db_from_df(df):
 def init_db():
     """Read excel file from gov website, check required columns exist, empty and repopulate database"""
 
-    df = pd.read_excel(find_xl_url())
-    populate_db_from_df(df)
+    scrape_page, last_reading = need_scrape()
+
+    if scrape_page:
+        new_url = find_xl_url()
+        file_name = re.search(r'([^/]+)(?=\.\w+$)', new_url).group(0)
+        sas_db = db.get_db()
+
+        if last_reading and new_url == last_reading['FileURL']:
+            # Update scrape date
+            sas_db.execute('UPDATE tbl_data_reading SET LastScrapeDate = ? WHERE ID = ?;', (datetime.now(), last_reading['ID']))
+            print('Scrape date updated')
+            message = "No new data to update"
+
+        else:
+            print('New URL found:', new_url)
+            # Read new file
+            df = pd.read_excel(new_url)
+            populate_db_from_df(df)
+            # Insert new data reading info
+            sas_db.execute('INSERT INTO tbl_data_reading (FileURL, FileName, ReadDate, LastScrapeDate) values (?, ?, ?, ?);', (new_url, file_name, datetime.now(), datetime.now()))
+            print('Updated with', new_url)
+            message = "Product data was updated with " + file_name
+
+        sas_db.commit()
+
+    else:
+        # Don't scrape
+        message = "Last scrape was today"
+
+    return message
+
+
+def need_scrape():
+
+    last_reading = find_last_reading()
+
+    if last_reading:
+        if last_reading['LastScrapeDate']:
+            # Found last scrape date
+            today_date = datetime.now().date()
+            last_scrape_date = last_reading['LastScrapeDate'].date()
+            diff = today_date - last_scrape_date
+            days_ago = diff.days
+            print('Last scrape was', days_ago, 'days ago')
+            if days_ago > 0:
+                # Last scrape was at least yesterday
+                scrape_page = True
+            else:
+                # Last scrape was today
+                scrape_page = False
+        else:
+            # Force new scrape because LastScrapeDate is not available
+            print('No scrape date found')
+            scrape_page = True
+    else:
+        # Empty table
+        print('No previous readings found')
+        scrape_page = True
+
+    return scrape_page, last_reading
+
+
+def find_last_reading():
+    sas_db = db.get_db()
+    last_reading = sas_db.execute('SELECT * FROM tbl_data_reading ORDER BY ReadDate DESC LIMIT 1;').fetchone()
+    return last_reading
+
+
+def find_last_file_name():
+    last_reading = find_last_reading()
+    if last_reading:
+        return last_reading['FileName']
+    else:
+        return None
