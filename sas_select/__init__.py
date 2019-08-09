@@ -69,7 +69,7 @@ def create_app(test_config=None):
 
         else:
             products = None
-        return render_template('listproducts.html', products=products, page_title="Products in database", frm=request.form, excel=datasheet.find_last_file_name())
+        return render_template('listproducts.html', products=products, page_title="Products in database", frm=request.form)
 
     def pack_entitlement(product):
         pack_size = product["PackSize"]
@@ -113,7 +113,7 @@ def create_app(test_config=None):
             abort(404)
         qty = pack_entitlement(product)
         # print(qty)
-        return render_template('viewproduct.html', product=product, page_title="View product", pack_entitlement=qty, excel=datasheet.find_last_file_name())
+        return render_template('viewproduct.html', product=product, page_title="View product", pack_entitlement=qty)
     db.init_app(app)
 
     @app.route('/init-db')
@@ -135,6 +135,10 @@ def create_app(test_config=None):
             return '${:,.2f}'.format(price)
         else:
             return '-${:,.2f}'.format(abs(price))
+
+    @app.context_processor
+    def inject_excel_file_name():
+        return dict(excel=datasheet.find_last_file_name())
 
     return app
 
