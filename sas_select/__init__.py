@@ -116,10 +116,10 @@ def create_app(test_config=None):
         return render_template('viewproduct.html', product=product, page_title="View product", pack_entitlement=qty)
     db.init_app(app)
 
-    @app.route('/init-db')
-    def init_db():
+    @app.route('/fetch-data')
+    def fetch_data():
         try:
-            message = datasheet.init_db()
+            message = datasheet.fetch_data()
             print(message)
             flash(message, 'success')
         except ValueError as err:

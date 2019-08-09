@@ -76,7 +76,7 @@ def populate_db_from_df(df):
     sas_db.commit()
 
 
-def init_db():
+def fetch_data():
     """Read excel file from gov website, check required columns exist, empty and repopulate database"""
 
     scrape_page, last_reading = need_scrape()
