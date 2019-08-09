@@ -83,7 +83,11 @@ def init_db():
 
     if scrape_page:
         new_url = find_xl_url()
-        file_name = re.search(r'([^/]+)(?=\.\w+$)', new_url).group(0)
+        regex = r'([^\/]+)(?=\.\w+$)'
+        # This regex is to find excel file name from end of url excluding final .xls or .xlsx
+        # ([^\/]+) : Find group of characters not including forward slash
+        # (?=.\w+$) : look ahead to find a dot, followed by a word, followed by end of line and exclude this whole part.
+        file_name = re.search(regex, new_url).group(0)
         sas_db = db.get_db()
 
         if last_reading and new_url == last_reading['FileURL']:
